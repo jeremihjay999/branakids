@@ -1,0 +1,240 @@
+"use client"
+
+import * as React from "react"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Menu, Baby, Shirt, Gamepad2, BookOpen, Heart, Star, Search, Home, Tag, Package, LifeBuoy, ChevronRight, Sparkles } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { useEffect, useState } from "react"
+import { usePathname } from "next/navigation"
+import Image from "next/image"
+
+export function MobileNav({ onSearch, searchValue, searchResults, onResultClick }: { 
+  onSearch?: (v: string) => void, 
+  searchValue?: string, 
+  searchResults?: any[], 
+  onResultClick?: () => void 
+}) {
+  const [open, setOpen] = React.useState(false)
+  const [categories, setCategories] = useState<any[]>([])
+  const [localSearchValue, setLocalSearchValue] = useState("")
+  const pathname = usePathname()
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch("/api/categories")
+        if (!response.ok) throw new Error("Failed to fetch categories")
+        const data = await response.json()
+        setCategories(data)
+      } catch (error) {
+        console.error("Error fetching categories:", error)
+        setCategories([])
+      }
+    }
+    fetchCategories()
+  }, [])
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (onSearch && localSearchValue) {
+      onSearch(localSearchValue)
+    }
+  }
+
+  const isActive = (path: string) => pathname === path
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button
+          variant="ghost"
+          className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
+        >
+          <Menu className="h-6 w-6" />
+          <span className="sr-only">Toggle Menu</span>
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="flex flex-col max-w-[85vw] w-80 p-0">
+        <div className="flex-1 overflow-auto">
+          <div className="flex items-center justify-center py-6">
+            <div className="bg-white/95 dark:bg-amber-100 border border-border shadow-xl rounded-3xl p-3 flex items-center justify-center transition-all duration-300 hover:shadow-2xl relative">
+              <div className="flex items-center space-x-1">
+                <div className="text-2xl font-bold text-brana-green">BRANA</div>
+                <div className="text-xl font-bold text-brana-pink">KIDS</div>
+              </div>
+              <div className="absolute -top-1 -right-1 text-brana-yellow text-sm">⭐</div>
+            </div>
+          </div>
+          <div className="bg-primary/10 dark:bg-primary/5 p-6 border-b">
+            {onSearch && (
+              <form onSubmit={handleSearch} className="relative mt-5">
+                <Input
+                  type="text"
+                  value={localSearchValue}
+                  onChange={(e) => setLocalSearchValue(e.target.value)}
+                  placeholder="Search kids products..."
+                  className="pl-10 pr-4 py-2 rounded-lg bg-background/90 border-primary/20 focus-visible:ring-primary/30"
+                />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Button 
+                  type="submit" 
+                  size="sm" 
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0 rounded-full"
+                  onClick={() => {
+                    if (onSearch) onSearch(localSearchValue);
+                  }}
+                >
+                  <Search className="h-3.5 w-3.5" />
+                  <span className="sr-only">Search</span>
+                </Button>
+              </form>
+            )}
+          </div>
+
+          <nav className="p-4">
+            <div className="space-y-1">
+              <Link 
+                href="/" 
+                onClick={() => setOpen(false)} 
+                className={`flex items-center gap-3 py-3 px-4 rounded-lg text-sm font-medium transition-colors ${
+                  isActive('/') 
+                    ? 'bg-primary/10 text-primary' 
+                    : 'hover:bg-accent'
+                }`}
+              >
+                <Home className="h-5 w-5" />
+                <span>Home</span>
+                {isActive('/') && <div className="ml-auto w-1.5 h-5 rounded-full bg-primary" />}
+              </Link>
+
+              <Accordion type="single" collapsible className="w-full border-none">
+                <AccordionItem value="shop" className="border-none">
+                  <AccordionTrigger className="py-3 px-4 rounded-lg hover:bg-accent text-sm font-medium">
+                    <div className="flex items-center gap-3">
+                      <Package className="h-5 w-5" />
+                      <span>Shop by Category</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="pb-1 pt-1">
+                    <div className="grid gap-1 pl-2">
+                      {categories.map((category) => (
+                        <Link
+                          key={category._id || category.slug}
+                          href={`/category/${category.slug}`}
+                          onClick={() => setOpen(false)}
+                          className={`flex items-center gap-3 py-2.5 px-4 ml-3 rounded-lg text-sm transition-colors ${
+                            isActive(`/category/${category.slug}`) 
+                              ? 'bg-primary/10 text-primary' 
+                              : 'hover:bg-accent'
+                          }`}
+                        >
+                          {getCategoryIcon(category.name)}
+                          <span>{category.name}</span>
+                          <ChevronRight className="ml-auto h-4 w-4 text-muted-foreground" />
+                        </Link>
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+
+              <Link 
+                href="/deals" 
+                onClick={() => setOpen(false)} 
+                className={`flex items-center gap-3 py-3 px-4 rounded-lg text-sm font-medium transition-colors ${
+                  isActive('/deals') 
+                    ? 'bg-primary/10 text-primary' 
+                    : 'hover:bg-accent'
+                }`}
+              >
+                <Tag className="h-5 w-5" />
+                <span>Deals</span>
+                {isActive('/deals') && <div className="ml-auto w-1.5 h-5 rounded-full bg-primary" />}
+              </Link>
+              
+              <Link 
+                href="/products" 
+                onClick={() => setOpen(false)} 
+                className={`flex items-center gap-3 py-3 px-4 rounded-lg text-sm font-medium transition-colors ${
+                  isActive('/products') 
+                    ? 'bg-primary/10 text-primary' 
+                    : 'hover:bg-accent'
+                }`}
+              >
+                <Package className="h-5 w-5" />
+                <span>All Products</span>
+                {isActive('/products') && <div className="ml-auto w-1.5 h-5 rounded-full bg-primary" />}
+              </Link>
+              
+              <Accordion type="single" collapsible className="w-full border-none">
+                <AccordionItem value="support" className="border-none">
+                  <AccordionTrigger className="py-3 px-4 rounded-lg hover:bg-accent text-sm font-medium">
+                    <div className="flex items-center gap-3">
+                      <LifeBuoy className="h-5 w-5" />
+                      <span>Support</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="pb-1 pt-1">
+                    <div className="grid gap-1 pl-2">
+                      <Link
+                        href="/contact"
+                        onClick={() => setOpen(false)}
+                        className={`flex items-center gap-3 py-2.5 px-4 ml-3 rounded-lg text-sm transition-colors ${
+                          isActive('/contact') 
+                            ? 'bg-primary/10 text-primary' 
+                            : 'hover:bg-accent'
+                        }`}
+                      >
+                        <span>Contact Us</span>
+                        {isActive('/contact') && <div className="ml-auto w-1.5 h-5 rounded-full bg-primary" />}
+                      </Link>
+                      <Link
+                        href="/faq"
+                        onClick={() => setOpen(false)}
+                        className={`flex items-center gap-3 py-2.5 px-4 ml-3 rounded-lg text-sm transition-colors ${
+                          isActive('/faq') 
+                            ? 'bg-primary/10 text-primary' 
+                            : 'hover:bg-accent'
+                        }`}
+                      >
+                        <span>FAQ</span>
+                        {isActive('/faq') && <div className="ml-auto w-1.5 h-5 rounded-full bg-primary" />}
+                      </Link>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </div>
+          </nav>
+        </div>
+
+        <div className="p-4 border-t mt-auto">
+          <p className="text-xs text-muted-foreground text-center">© {new Date().getFullYear()} BRANA KIDS • Let Your Kid Smile</p>
+        </div>
+      </SheetContent>
+    </Sheet>
+  )
+}
+
+function getCategoryIcon(categoryName: string) {
+  const name = categoryName.toLowerCase();
+  
+  if (name.includes("baby") || name.includes("infant") || name.includes("newborn")) 
+    return <Baby className="h-4 w-4 text-primary" />;
+  if (name.includes("clothing") || name.includes("clothes") || name.includes("apparel")) 
+    return <Shirt className="h-4 w-4 text-primary" />;
+  if (name.includes("toy") || name.includes("game") || name.includes("play")) 
+    return <Gamepad2 className="h-4 w-4 text-primary" />;
+  if (name.includes("book") || name.includes("education") || name.includes("learning")) 
+    return <BookOpen className="h-4 w-4 text-primary" />;
+  if (name.includes("accessory") || name.includes("jewelry") || name.includes("decoration")) 
+    return <Heart className="h-4 w-4 text-primary" />;
+  if (name.includes("special") || name.includes("featured") || name.includes("premium")) 
+    return <Star className="h-4 w-4 text-primary" />;
+  
+  // Default icon for children's products
+  return <Sparkles className="h-4 w-4 text-primary" />;
+}
