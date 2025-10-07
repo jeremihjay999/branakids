@@ -74,6 +74,7 @@
     "react-hook-form": "^7.51.0",
     "react-icons": "^5.5.0",
     "react-resizable-panels": "^2.0.16",
+    "react-sheet": "^0.0.90",
     "recharts": "^2.12.2",
     "sonner": "^1.4.0",
     "tailwind-merge": "^2.2.1",
