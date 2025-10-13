@@ -342,7 +342,7 @@ export default function LandingPage() {
             </div>
 
             {/* Products Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-2">
               {currentProducts.map((product) => {
                 const inCart = cartItems.some(item => item.id === product._id)
                 const isWishlisted = wishlist.includes(product._id)
@@ -410,7 +410,7 @@ export default function LandingPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="absolute top-12 right-2 bg-white/90 hover:bg-white shadow-md border-0 rounded-full w-8 h-8 opacity-0 group-hover:opacity-100 transition-all duration-300"
+                          className="absolute top-12 right-2 bg-white/90 hover:bg-white shadow-md border-0 rounded-full w-8 h-8 opacity-100 md:opacity-0 group-hover:opacity-100 transition-all duration-300"
                           onClick={(e) => {
                             e.stopPropagation()
                             handleAddToCart(product)

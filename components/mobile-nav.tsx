@@ -167,7 +167,7 @@ export function MobileNav({ onSearch, searchValue, searchResults, onResultClick,
               </Link>
               
               <Link 
-                href="/products" 
+                href="/" 
                 onClick={() => setOpen(false)} 
                 className={`flex items-center gap-3 py-3 px-4 rounded-lg text-sm font-medium transition-colors ${
                   isActive('/products') 

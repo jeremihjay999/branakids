@@ -73,8 +73,8 @@ export default function RootLayout({
       "@context": "https://schema.org",
       "@type": "Organization",
       "name": "BRANA KIDS",
-      "url": "https://branakids.co.ke",
-      "logo": "https://branakids.co.ke/logo.png",
+      "url": "https://branakids.com",
+      "logo": "https://branakids.com/logo1.png",
       "description": "Children's store bringing joy and smiles to your little ones",
       "contactPoint": {
         "@type": "ContactPoint",
