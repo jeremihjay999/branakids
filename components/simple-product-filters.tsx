@@ -58,6 +58,9 @@ const CATEGORIES = [
 ];
 
 export function SimpleProductFilters({ products, onFiltersChange, className }: SimpleProductFiltersProps) {
+  // Use a ref to track if this is the initial render
+  const isInitialMount = React.useRef(true);
+  
   const [filters, setFilters] = useState<FilterState>({
     categories: [],
     onSale: false,
@@ -66,37 +69,73 @@ export function SimpleProductFilters({ products, onFiltersChange, className }: S
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   // Get unique categories from products
-  const availableCategories = Array.from(
-    new Set(products.map(p => p.category))
-  ).sort();
+  const availableCategories = React.useMemo(() => 
+    Array.from(new Set(products.map(p => p.category))).sort(),
+    [products]
+  );
 
-  // Apply filters
-  useEffect(() => {
-    let filtered = [...products];
+  // Apply filters and notify parent when they change
+  React.useEffect(() => {
+    // Skip the initial render to prevent double-calling with initial state
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    let result = [...products];
 
     // Category filter
     if (filters.categories.length > 0) {
-      filtered = filtered.filter(product => 
+      result = result.filter(product => 
         filters.categories.includes(product.category)
       );
     }
 
     // On sale filter
     if (filters.onSale) {
-      filtered = filtered.filter(product => product.isDeal);
+      result = result.filter(product => product.isDeal);
     }
 
-    onFiltersChange(filtered);
+    onFiltersChange(result);
   }, [filters, products, onFiltersChange]);
 
-  const toggleCategory = (category: string) => {
-    setFilters(prev => ({
-      ...prev,
-      categories: prev.categories.includes(category)
+  const toggleCategory = React.useCallback((category: string) => {
+    setFilters(prev => {
+      const newCategories = prev.categories.includes(category)
         ? prev.categories.filter(c => c !== category)
-        : [...prev.categories, category]
-    }));
-  };
+        : [...prev.categories, category];
+      
+      // Return a new object to ensure state update
+      return {
+        ...prev,
+        categories: newCategories
+      };
+    });
+  }, []);
+
+  // Memoize the filter application to prevent unnecessary recalculations
+  const filteredProducts = React.useMemo(() => {
+    let result = [...products];
+
+    // Category filter
+    if (filters.categories.length > 0) {
+      result = result.filter(product => 
+        filters.categories.includes(product.category)
+      );
+    }
+
+    // On sale filter
+    if (filters.onSale) {
+      result = result.filter(product => product.isDeal);
+    }
+
+    return result;
+  }, [filters, products]);
+
+  // Call onFiltersChange only when filteredProducts changes
+  React.useEffect(() => {
+    onFiltersChange(filteredProducts);
+  }, [filteredProducts, onFiltersChange]);
 
   const clearAllFilters = () => {
     setFilters({
@@ -146,18 +185,31 @@ export function SimpleProductFilters({ products, onFiltersChange, className }: S
                 className={`flex items-center space-x-3 p-2 rounded-lg transition-colors ${
                   isSelected ? 'bg-brana-green/10 border border-brana-green/20' : 'hover:bg-gray-50'
                 } ${!isAvailable ? 'opacity-50' : 'cursor-pointer'}`}
-                onClick={() => isAvailable && toggleCategory(category.name)}
               >
-                <Checkbox
-                  checked={isSelected}
-                  onChange={() => isAvailable && toggleCategory(category.name)}
-                  disabled={!isAvailable}
-                  className="data-[state=checked]:bg-brana-green data-[state=checked]:border-brana-green"
-                />
-                <Icon className={`h-4 w-4 ${category.color}`} />
-                <span className={`text-sm ${isSelected ? 'font-medium text-brana-green' : 'text-gray-700'}`}>
-                  {category.name}
-                </span>
+                <div className="flex items-center space-x-2 flex-1">
+                  <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      id={`category-${category.name}`}
+                      checked={isSelected}
+                      onCheckedChange={() => isAvailable && toggleCategory(category.name)}
+                      disabled={!isAvailable}
+                      className={`h-5 w-5 rounded-md border-2 transition-colors duration-200 ${
+                        isSelected 
+                          ? 'bg-brana-green border-brana-green text-white' 
+                          : 'border-gray-300 hover:border-brana-green hover:bg-gray-50'
+                      }`}
+                    />
+                  </div>
+                  <Icon className={`h-4 w-4 ${category.color} flex-shrink-0`} />
+                  <label 
+                    htmlFor={`category-${category.name}`}
+                    className={`text-sm cursor-pointer select-none ${
+                      isSelected ? 'font-medium text-brana-green' : 'text-gray-700'
+                    }`}
+                  >
+                    {category.name}
+                  </label>
+                </div>
                 {!isAvailable && (
                   <span className="text-xs text-gray-400 ml-auto">No items</span>
                 )}
@@ -195,17 +247,37 @@ export function SimpleProductFilters({ products, onFiltersChange, className }: S
           <Filter className="h-5 w-5" />
           Special Offers
         </h3>
-        <div
-          className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer"
-          onClick={() => setFilters(prev => ({ ...prev, onSale: !prev.onSale }))}
-        >
-          <Checkbox
-            checked={filters.onSale}
-            onChange={() => setFilters(prev => ({ ...prev, onSale: !prev.onSale }))}
-            className="data-[state=checked]:bg-brana-yellow data-[state=checked]:border-brana-yellow"
-          />
-          <Sparkles className="h-4 w-4 text-brana-yellow" />
-          <span className="text-sm text-gray-700">On Sale</span>
+        <div className="space-y-2">
+          <div
+            className={`flex items-center p-2 rounded-lg transition-colors ${
+              filters.onSale ? 'bg-brana-green/10 border border-brana-green/20' : 'hover:bg-gray-50'
+            }`}
+            onClick={() => setFilters(prev => ({ ...prev, onSale: !prev.onSale }))}
+          >
+            <div className="flex items-center space-x-2 flex-1">
+              <Checkbox
+                id="on-sale"
+                checked={filters.onSale}
+                onCheckedChange={(checked) => setFilters(prev => ({ ...prev, onSale: !!checked }))}
+                className={`h-5 w-5 rounded-md border-2 transition-colors duration-200 ${
+                  filters.onSale 
+                    ? 'bg-brana-green border-brana-green text-white' 
+                    : 'border-gray-300 hover:border-brana-green hover:bg-gray-50'
+                }`}
+              />
+              <label 
+                htmlFor="on-sale" 
+                className={`text-sm cursor-pointer select-none ${
+                  filters.onSale ? 'font-medium text-brana-green' : 'text-gray-700'
+                }`}
+              >
+                On Sale
+              </label>
+            </div>
+            <span className="ml-auto px-2 py-1 bg-brana-yellow/20 text-brana-yellow-dark text-xs font-medium rounded-full whitespace-nowrap">
+              Special Deal
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -213,17 +285,6 @@ export function SimpleProductFilters({ products, onFiltersChange, className }: S
 
   return (
     <>
-      {/* Mobile Filter Button */}
-      <div className="lg:hidden mb-4">
-        <Button
-          onClick={() => setIsMobileOpen(true)}
-          className="w-full bg-brana-green hover:bg-brana-green/90 text-white"
-        >
-          <Filter className="h-4 w-4 mr-2" />
-          Filters ({getActiveFiltersCount()})
-        </Button>
-      </div>
-
       {/* Desktop Sidebar */}
       <div className={`hidden lg:block ${className}`}>
         <Card className="sticky top-4">
@@ -238,30 +299,6 @@ export function SimpleProductFilters({ products, onFiltersChange, className }: S
           </CardContent>
         </Card>
       </div>
-
-      {/* Mobile Filter Modal */}
-      {isMobileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setIsMobileOpen(false)} />
-          <div className="absolute right-0 top-0 h-full w-80 bg-white shadow-xl overflow-y-auto">
-            <div className="p-4 border-b">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-brana-green">Filters</h2>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsMobileOpen(false)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            <div className="p-4">
-              <FilterContent />
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }

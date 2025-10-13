@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -23,6 +23,13 @@ export function ShoppingCart() {
   const [orderForm, setOrderForm] = useState({ name: "", phone: "", notes: "" })
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+
+  useEffect(() => {
+    const handleOpenCart = () => setOpen(true)
+    window.addEventListener('open-cart', handleOpenCart)
+    return () => window.removeEventListener('open-cart', handleOpenCart)
+  }, [])
+
 
   const handleOrderField = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setOrderForm(prev => ({ ...prev, [e.target.name]: e.target.value }))

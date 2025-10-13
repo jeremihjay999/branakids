@@ -2,277 +2,194 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import Image from "next/image"
+import { useRouter, usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { 
-  Search, 
-  ShoppingCart, 
-  Heart, 
-  Menu, 
-  X, 
-  User, 
-  Star,
-  Phone,
-  MessageCircle
-} from "lucide-react"
+import { Search, ShoppingCart, Heart, Menu, X, Phone, Mail } from "lucide-react"
 import { useCart } from "@/components/cart-context"
-import { getWhatsAppUrl, getWhatsAppPhone } from "@/lib/whatsapp"
-import { cn } from "@/lib/utils"
-import { CartModal } from "@/components/cart-modal"
 
 export function Navbar() {
-  const { items: cartItems, subtotal } = useCart()
-  const [wishlist, setWishlist] = useState<string[]>([])
+  const { items: cartItems } = useCart()
+  const [wishlistCount, setWishlistCount] = useState(0)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [cartOpen, setCartOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
-  const [whatsappPhone, setWhatsappPhone] = useState("+254758212888")
+  const [isScrolled, setIsScrolled] = useState(false)
+  const router = useRouter()
+  const pathname = usePathname()
 
+  // Handle scroll effect for navbar
   useEffect(() => {
-    // Get phone number from utility function
-    setWhatsappPhone(getWhatsAppPhone())
-    
-    // Load wishlist from localStorage
-    const savedWishlist = localStorage.getItem('branakids-wishlist')
-    if (savedWishlist) {
-      setWishlist(JSON.parse(savedWishlist))
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10)
     }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Listen for wishlist changes
+  // Handle wishlist count
   useEffect(() => {
-    const handleStorageChange = () => {
-      const savedWishlist = localStorage.getItem('branakids-wishlist')
-      if (savedWishlist) {
-        setWishlist(JSON.parse(savedWishlist))
-      }
+    const updateWishlistCount = () => {
+      const wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]")
+      setWishlistCount(wishlist.length)
     }
-
-    window.addEventListener('storage', handleStorageChange)
-    return () => window.removeEventListener('storage', handleStorageChange)
+    
+    // Initial load
+    updateWishlistCount()
+    
+    // Listen for wishlist changes
+    window.addEventListener("wishlistChanged", updateWishlistCount)
+    return () => window.removeEventListener("wishlistChanged", updateWishlistCount)
   }, [])
 
   const cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0)
-  const wishlistCount = wishlist.length
-
-  // Debug logging
-  console.log('Navbar - Cart items:', cartItems)
-  console.log('Navbar - Cart count:', cartItemCount)
-  console.log('Navbar - Wishlist:', wishlist)
-  console.log('Navbar - Wishlist count:', wishlistCount)
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     if (searchTerm.trim()) {
-      // Navigate to products page with search term
-      window.location.href = `/?search=${encodeURIComponent(searchTerm.trim())}`
+      router.push(`/search?query=${encodeURIComponent(searchTerm.trim())}`)
+      setSearchTerm("")
+      setMobileMenuOpen(false) // Close mobile menu after search
     }
   }
 
-  const handleWhatsAppContact = () => {
-    const message = "Hello! I'm interested in your products. Can you help me? 🌟"
-    const whatsappUrl = getWhatsAppUrl(message)
-    window.open(whatsappUrl, '_blank')
-  }
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setMobileMenuOpen(false)
+  }, [pathname])
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-      <div className="container mx-auto px-4">
-        {/* Main Navbar */}
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 group">
-            <div className="relative">
-              <div className="text-2xl font-bold text-brana-green group-hover:scale-105 transition-transform duration-300">
-                BRANA
-              </div>
-              <div className="text-xl font-bold text-brana-pink group-hover:scale-105 transition-transform duration-300">
-                KIDS
-              </div>
-              <div className="absolute -top-1 -right-1 text-brana-yellow text-sm animate-bounce-gentle">
-                ⭐
-              </div>
-            </div>
-          </Link>
-
-          {/* Search Bar - Desktop */}
-          <div className="hidden md:flex flex-1 max-w-md mx-8">
-            <form onSubmit={handleSearch} className="w-full relative">
-              <Input
-                type="text"
-                placeholder="Search for toys, clothes, books..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pr-10 rounded-full border-2 border-gray-200 focus:border-brana-green transition-colors"
-              />
-              <Button
-                type="submit"
-                size="icon"
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-brana-green hover:bg-brana-green/90"
-              >
-                <Search className="h-4 w-4" />
-              </Button>
-            </form>
+    <header className={`sticky top-0 z-50 bg-white transition-shadow duration-300 ${isScrolled ? 'shadow-md' : ''}`}>
+      {/* Top Contact Bar */}
+      <div className="bg-gray-100 text-gray-600 text-sm py-2 border-b border-gray-200">
+        <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
+          <div className="flex items-center space-x-4 mb-2 md:mb-0">
+            <a href="tel:+254758212888" className="flex items-center hover:text-pink-500 transition-colors">
+              <Phone className="h-3.5 w-3.5 mr-1.5" />
+              <span>+254 758 212 888</span>
+            </a>
+            <span className="hidden md:inline-block text-gray-300">|</span>
+            <a href="mailto:info@branakids.co.ke" className="flex items-center hover:text-pink-500 transition-colors">
+              <Mail className="h-3.5 w-3.5 mr-1.5" />
+              <span>info@branakids.co.ke</span>
+            </a>
           </div>
-
-          {/* Right Side Icons */}
-          <div className="flex items-center space-x-2">
-            {/* WhatsApp Contact - Desktop */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleWhatsAppContact}
-              className="hidden lg:flex h-10 w-10 rounded-full bg-green-100 hover:bg-green-200 text-green-600"
-              title={`Contact us: ${whatsappPhone}`}
-            >
-              <MessageCircle className="h-5 w-5" />
-            </Button>
-
-            {/* Wishlist */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative h-10 w-10 rounded-full hover:bg-pink-100 transition-colors"
-              title="Wishlist"
-              onClick={() => {
-                // Toggle wishlist modal or show wishlist items
-                console.log('Wishlist clicked, items:', wishlistCount)
-              }}
-            >
-              <Heart className="h-5 w-5 text-pink-500" />
-              {wishlistCount > 0 && (
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-pink-500 text-white font-bold">
-                  {wishlistCount}
-                </Badge>
-              )}
-            </Button>
-
-            {/* Cart */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative h-10 w-10 rounded-full hover:bg-brana-green/10 transition-colors"
-              title="Shopping Cart"
-              onClick={() => setCartOpen(true)}
-            >
-              <ShoppingCart className="h-5 w-5 text-brana-green" />
-              {cartItemCount > 0 && (
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-brana-green text-white font-bold">
-                  {cartItemCount}
-                </Badge>
-              )}
-            </Button>
-
-            {/* User Account */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-10 w-10 rounded-full hover:bg-gray-100 transition-colors"
-              title="Account"
-            >
-              <User className="h-5 w-5 text-gray-600" />
-            </Button>
-
-            {/* Mobile Menu Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden h-10 w-10 rounded-full"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
-            </Button>
+          <div className="text-xs">
+            Free delivery on orders over Ksh 3,000
           </div>
         </div>
+      </div>
 
-        {/* Mobile Search Bar */}
-        <div className="md:hidden pb-4">
-          <form onSubmit={handleSearch} className="relative">
+      {/* Main Navigation */}
+      <nav className="container mx-auto px-4 h-16 md:h-20 flex items-center justify-between">
+        {/* Mobile Menu Button */}
+        <div className="md:hidden">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+          >
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </Button>
+        </div>
+
+        {/* Logo - Centered on mobile, left on desktop */}
+        <Link 
+          href="/" 
+          className="text-2xl md:text-3xl font-bold text-gray-800 hover:text-pink-500 transition-colors flex-1 md:flex-none text-center md:text-left"
+        >
+          BRANA<span className="text-pink-500">★</span>
+        </Link>
+
+        {/* Search Bar - Desktop */}
+        <div className="hidden md:flex flex-1 max-w-xl mx-8">
+          <form onSubmit={handleSearch} className="w-full relative">
             <Input
               type="text"
-              placeholder="Search for toys, clothes, books..."
+              placeholder="Search products..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pr-10 rounded-full border-2 border-gray-200 focus:border-brana-green transition-colors"
+              className="pr-12 rounded-full border-gray-300 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 h-10"
+              aria-label="Search products"
             />
             <Button
               type="submit"
               size="icon"
-              className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-brana-green hover:bg-brana-green/90"
+              variant="ghost"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full text-gray-500 hover:text-pink-500 hover:bg-pink-50"
+              aria-label="Search"
             >
               <Search className="h-4 w-4" />
             </Button>
           </form>
         </div>
 
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-4 space-y-4">
-            {/* Mobile Navigation Links */}
-            <div className="space-y-2">
-              <Link
-                href="/"
-                className="flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <Star className="h-5 w-5 text-brana-yellow" />
-                <span className="font-medium">Home</span>
-              </Link>
-              <Link
-                href="/products"
-                className="flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <ShoppingCart className="h-5 w-5 text-brana-green" />
-                <span className="font-medium">All Products</span>
-              </Link>
-              <Link
-                href="/deals"
-                className="flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                <Star className="h-5 w-5 text-red-500" />
-                <span className="font-medium">Special Deals</span>
-              </Link>
-            </div>
+        {/* Right Icons */}
+        <div className="flex items-center space-x-2 md:space-x-4">
+          <Link href="/wishlist" passHref>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative rounded-full hover:bg-pink-50 group"
+              aria-label={`Wishlist (${wishlistCount} items)`}
+            >
+              <Heart className="h-5 w-5 text-gray-600 group-hover:text-pink-500 transition-colors" />
+              {wishlistCount > 0 && (
+                <Badge 
+                  className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center rounded-full bg-pink-500 text-white text-xs"
+                  aria-hidden="true"
+                >
+                  {wishlistCount > 9 ? '9+' : wishlistCount}
+                </Badge>
+              )}
+            </Button>
+          </Link>
 
-            {/* Mobile Contact */}
-            <div className="border-t border-gray-200 pt-4">
-              <Button
-                onClick={handleWhatsAppContact}
-                className="w-full bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center justify-center space-x-2"
-              >
-                <MessageCircle className="h-5 w-5" />
-                <span>Contact Us: {whatsappPhone}</span>
-              </Button>
-            </div>
+          <Link href="/cart" passHref>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative rounded-full hover:bg-pink-50 group"
+              aria-label={`Shopping Cart (${cartItemCount} items)`}
+            >
+              <ShoppingCart className="h-5 w-5 text-gray-600 group-hover:text-pink-500 transition-colors" />
+              {cartItemCount > 0 && (
+                <Badge 
+                  className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center rounded-full bg-pink-500 text-white text-xs"
+                  aria-hidden="true"
+                >
+                  {cartItemCount > 9 ? '9+' : cartItemCount}
+                </Badge>
+              )}
+            </Button>
+          </Link>
+        </div>
+      </nav>
 
-            {/* Mobile Cart Summary */}
-            {cartItemCount > 0 && (
-              <div className="border-t border-gray-200 pt-4">
-                <div className="flex items-center justify-between px-4 py-2 bg-brana-green/10 rounded-lg">
-                  <div className="flex items-center space-x-2">
-                    <ShoppingCart className="h-5 w-5 text-brana-green" />
-                    <span className="font-medium">Cart ({cartItemCount} items)</span>
-                  </div>
-                  <span className="font-bold text-brana-green">
-                    KSh {subtotal.toLocaleString()}
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+      {/* Mobile Search - Hidden on desktop */}
+      <div className="md:hidden px-4 pb-4 -mt-2">
+        <form onSubmit={handleSearch} className="relative">
+          <Input
+            type="text"
+            placeholder="Search products..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pr-12 rounded-full border-gray-300 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 h-10"
+            aria-label="Search products"
+          />
+          <Button
+            type="submit"
+            size="icon"
+            variant="ghost"
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full text-gray-500 hover:text-pink-500 hover:bg-pink-50"
+            aria-label="Search"
+          >
+            <Search className="h-4 w-4" />
+          </Button>
+        </form>
       </div>
-
-      {/* Cart Modal */}
-      <CartModal isOpen={cartOpen} onClose={() => setCartOpen(false)} />
-    </nav>
+    </header>
   )
 }

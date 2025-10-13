@@ -268,22 +268,24 @@ export function AddProductForm({ initialData, categories, onSuccess }: AddProduc
           class: 'text-primary underline',
         },
       }),
-      TextAlign.configure({
-        types: ['heading', 'paragraph'],
-        alignments: ['left', 'center', 'right'],
-        defaultAlignment: 'left',
-      }),
     ],
-    content: formData.description,
-    onUpdate: ({ editor }) => {
-      handleChange('description', editor.getHTML())
+    content: formData.description || '',
+    editorProps: {
+      attributes: {
+        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl focus:outline-none min-h-[200px] p-4 border rounded-md',
+      },
     },
+    // Disable immediate rendering to prevent hydration issues
+    autofocus: false,
+    injectCSS: false,
+    // Explicitly set immediatelyRender to false for SSR compatibility
+    immediatelyRender: false,
   })
 
   // Update editor content when formData.description changes
   useEffect(() => {
     if (editor && formData.description !== editor.getHTML()) {
-      editor.commands.setContent(formData.description)
+      editor.commands.setContent(formData.description || '')
     }
   }, [formData.description, editor])
 

@@ -41,14 +41,18 @@ function ProductsContent({ products, loading, error }: { products: Product[]; lo
   const router = useRouter()
   const pathname = usePathname()
   const [wishlist, setWishlist] = useState<string[]>([])
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(products)
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
   const searchValue = searchParams.get("search") || ""
   const [debouncedSearch, setDebouncedSearch] = useState(searchValue)
 
-  // Update filtered products when products change
+  // Initialize filtered products only once when products are loaded
   useEffect(() => {
-    setFilteredProducts(products)
-  }, [products])
+    if (isInitialLoad && products.length > 0) {
+      setFilteredProducts(products)
+      setIsInitialLoad(false)
+    }
+  }, [products, isInitialLoad])
 
   // Debounce search input
   useEffect(() => {
@@ -163,8 +167,8 @@ function ProductsContent({ products, loading, error }: { products: Product[]; lo
 
         {/* Main Content with Filters */}
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Filter Sidebar */}
-          <div className="lg:w-80 flex-shrink-0">
+          {/* Filter Sidebar - Hidden on mobile, visible on lg and up */}
+          <div className="hidden lg:block lg:w-80 flex-shrink-0">
             <SimpleProductFilters
               products={products}
               onFiltersChange={setFilteredProducts}
@@ -388,9 +392,9 @@ export default function ProductsPage() {
 
   return (
     <Suspense fallback={<div>Loading…</div>}>
-      <Layout searchHandler={setSearch} searchValue={search} searchResults={products}>
-        <ProductsContent products={products} loading={loading} error={error} />
-      </Layout>
+      <div className="min-h-screen bg-background">
+        <ProductsContent products={filteredProducts} loading={loading} error={error} />
+      </div>
     </Suspense>
   )
-} 
+}

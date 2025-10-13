@@ -235,10 +235,6 @@ export default function SeedDataPage() {
             After seeding, you can view the products at{' '}
             <a href="/products" className="text-brana-green hover:underline">
               /products
-            </a>{' '}
-            or test the filters at{' '}
-            <a href="/test-filters" className="text-brana-green hover:underline">
-              /test-filters
             </a>
           </p>
         </div>

@@ -62,9 +62,13 @@ export default function CategoryPage() {
         // Fetch all products
         const prodRes = await fetch("/api/products")
         if (!prodRes.ok) throw new Error("Failed to fetch products")
-        const allProducts = await prodRes.json()
+        const response = await prodRes.json()
+        // Ensure we have an array, even if the API returns an object with a products property
+        const allProducts = Array.isArray(response) ? response : (response.products || []);
         // Filter products by category name
-        const filtered = allProducts.filter((product: Product) => product.category?.toLowerCase() === foundCategory.name.toLowerCase())
+        const filtered = allProducts.filter((product: Product) => 
+          product?.category?.toLowerCase() === foundCategory.name.toLowerCase()
+        )
         setProducts(filtered)
       } catch (err: any) {
         setError(err.message || "Failed to load category or products")
@@ -118,32 +122,7 @@ export default function CategoryPage() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center">
-            <MobileNav onSearch={setSearch} />
-            <Link href="/" className="hidden md:flex items-center transition-transform hover:scale-105">
-              <div className="bg-white/90 dark:bg-amber-50 border border-border shadow-lg rounded-2xl p-1 flex items-center justify-center">
-                <Image
-                  src="https://res.cloudinary.com/duo5azl81/image/upload/v1749407303/logo2_zxxky4.png"
-                  alt="Safir Dynamics"
-                  width={200}
-                  height={70}
-                  className="h-10 w-10 object-contain"
-                  priority
-                />
-              </div>
-            </Link>
-            <MainNav onSearch={setSearch} searchValue={search} searchResults={searchResults} onResultClick={() => setSearch("")} />
-          </div>
-          <div className="flex items-center space-x-3">
-            <ThemeToggle />
-            <div className="h-5 w-px bg-border mx-0.5 hidden md:block" />
-            <ShoppingCart />
-          </div>
-        </div>
-      </header>
-      <section className="py-12 md:py-16">
+      <section className="py-12 md:py-16 pt-24">
         <div className="container px-4 md:px-6">
           {loading ? (
             <div className="flex flex-col items-center justify-center min-h-[300px]">

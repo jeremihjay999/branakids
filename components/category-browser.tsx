@@ -24,7 +24,6 @@ const colorPalette = [
 const fixedColorMap = {
   "Audio": "bg-red-500/10 text-red-500",
   "Smartphone $ Tablets": "bg-green-500/10 text-green-500",
-  "test": "bg-purple-500/10 text-purple-500",
 }
 
 // Function to get color for a category

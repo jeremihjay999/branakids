@@ -5,17 +5,19 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Menu, Baby, Shirt, Gamepad2, BookOpen, Heart, Star, Search, Home, Tag, Package, LifeBuoy, ChevronRight, Sparkles } from "lucide-react"
+import { Menu, Baby, Shirt, Gamepad2, BookOpen, Heart, Star, Search, Home, Tag, Package, LifeBuoy, ChevronRight, Sparkles, X, ShoppingCart, User } from "lucide-react"
+import { MobileBottomNav } from "./mobile-bottom-nav"
 import { Input } from "@/components/ui/input"
 import { useEffect, useState } from "react"
 import { usePathname } from "next/navigation"
 import Image from "next/image"
 
-export function MobileNav({ onSearch, searchValue, searchResults, onResultClick }: { 
+export function MobileNav({ onSearch, searchValue, searchResults, onResultClick, cartCount = 0 }: { 
   onSearch?: (v: string) => void, 
   searchValue?: string, 
   searchResults?: any[], 
-  onResultClick?: () => void 
+  onResultClick?: () => void,
+  cartCount?: number
 }) {
   const [open, setOpen] = React.useState(false)
   const [categories, setCategories] = useState<any[]>([])
@@ -58,16 +60,25 @@ export function MobileNav({ onSearch, searchValue, searchResults, onResultClick 
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="flex flex-col max-w-[85vw] w-80 p-0">
-        <div className="flex-1 overflow-auto">
-          <div className="flex items-center justify-center py-6">
-            <div className="bg-white/95 dark:bg-amber-100 border border-border shadow-xl rounded-3xl p-3 flex items-center justify-center transition-all duration-300 hover:shadow-2xl relative">
-              <div className="flex items-center space-x-1">
-                <div className="text-2xl font-bold text-brana-green">BRANA</div>
-                <div className="text-xl font-bold text-brana-pink">KIDS</div>
-              </div>
-              <div className="absolute -top-1 -right-1 text-brana-yellow text-sm">⭐</div>
-            </div>
+        <div className="flex items-center justify-between w-full p-2 md:hidden bg-white border-b sticky top-0 z-40">
+          <div className="flex items-center">
+            <div className="text-2xl font-bold text-brana-green">BRANA</div>
+            <div className="text-xl font-bold text-brana-pink">KIDS</div>
           </div>
+          <div className="absolute -top-1 -right-1 text-brana-yellow text-sm">⭐</div>
+        </div>
+        <div className="flex-1 overflow-auto">
+          <div className="flex items-center justify-center py-6 px-4">
+          <Link href="/" className="block h-12 w-full max-w-[180px]">
+            <img 
+              src="/Logo1.png" 
+              alt="Brana Kids" 
+              className="h-full w-full object-contain"
+              width={180}
+              height={48}
+            />
+          </Link>
+        </div>
           <div className="bg-primary/10 dark:bg-primary/5 p-6 border-b">
             {onSearch && (
               <form onSubmit={handleSearch} className="relative mt-5">
@@ -211,9 +222,21 @@ export function MobileNav({ onSearch, searchValue, searchResults, onResultClick 
           </nav>
         </div>
 
-        <div className="p-4 border-t mt-auto">
-          <p className="text-xs text-muted-foreground text-center">© {new Date().getFullYear()} BRANA KIDS • Let Your Kid Smile</p>
+        <div className="flex items-center space-x-2">
+          <Link href="/search" className="p-2">
+            <Search className="h-5 w-5" />
+          </Link>
+          <Link href="/cart" className="relative p-2">
+            <ShoppingCart className="h-5 w-5" />
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-pink-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                {cartCount > 9 ? '9+' : cartCount}
+              </span>
+            )}
+          </Link>
         </div>
+
+        <MobileBottomNav />
       </SheetContent>
     </Sheet>
   )

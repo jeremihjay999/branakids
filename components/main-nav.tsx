@@ -12,7 +12,7 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
-import { Baby, Shirt, Gamepad2, BookOpen, Heart, Star, HelpCircle, Search, ChevronRight, X, Package, LifeBuoy, Sparkles } from "lucide-react"
+import { Baby, Shirt, Gamepad2, BookOpen, Heart, Star, HelpCircle, Search, ChevronRight, X, Package, LifeBuoy, Sparkles, Home } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Input } from "@/components/ui/input"
 import { usePathname } from "next/navigation"
@@ -39,8 +39,32 @@ export function MainNav({ onSearch, searchValue, searchResults = [], onResultCli
 
   return (
     <div className="hidden md:flex items-center">
+      {/* Logo */}
+      <div className="mr-4">
+        <Link href="/" className="block h-10 w-auto">
+          <img 
+            src="/Logo1.png" 
+            alt="Brana Kids Logo" 
+            className="h-full w-auto object-contain"
+            width={120}
+            height={40}
+          />
+        </Link>
+      </div>
+      
       <NavigationMenu>
         <NavigationMenuList className="space-x-1">
+          <NavigationMenuItem>
+            <Link href="/" legacyBehavior passHref>
+              <NavigationMenuLink className={cn(
+                navigationMenuTriggerStyle(),
+                "bg-transparent hover:bg-accent/50 font-medium text-base",
+                pathname === "/" && "text-primary font-semibold"
+              )}>
+                <Home className="h-5 w-5 mr-1" /> Home
+              </NavigationMenuLink>
+            </Link>
+          </NavigationMenuItem>
           <NavigationMenuItem>
             <NavigationMenuTrigger className="bg-transparent hover:bg-accent/50 font-medium text-base">Shop</NavigationMenuTrigger>
             <NavigationMenuContent>
@@ -88,7 +112,7 @@ export function MainNav({ onSearch, searchValue, searchResults = [], onResultCli
                   </div>
                 </div>
                 <div className="mt-4 pt-4 border-t">
-                  <Link href="/products" className="flex items-center justify-between px-3 py-2 rounded-lg transition-colors hover:bg-primary/10 focus:bg-primary/10 text-primary font-medium">
+                  <Link href="/" className="flex items-center justify-between px-3 py-2 rounded-lg transition-colors hover:bg-primary/10 focus:bg-primary/10 text-primary font-medium">
                     <span>View all categories</span>
                     <ChevronRight className="h-4 w-4" />
                   </Link>
@@ -108,13 +132,13 @@ export function MainNav({ onSearch, searchValue, searchResults = [], onResultCli
             </Link>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <Link href="/products" legacyBehavior passHref>
+            <Link href="/" legacyBehavior passHref>
               <NavigationMenuLink className={cn(
                 navigationMenuTriggerStyle(),
                 "bg-transparent hover:bg-accent/50 font-medium text-base",
-                pathname === "/products" && "text-primary font-semibold"
+                pathname === "/" && "text-primary font-semibold"
               )}>
-                All Products
+                Shop All
               </NavigationMenuLink>
             </Link>
           </NavigationMenuItem>

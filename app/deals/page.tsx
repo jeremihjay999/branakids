@@ -43,11 +43,11 @@ export default function DealsPage() {
     }
   }, [search])
 
-  const searchResults = debouncedSearch
+  const searchResults = debouncedSearch && Array.isArray(allProducts)
     ? allProducts.filter(
         (product) =>
-          product.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-          product.description.toLowerCase().includes(debouncedSearch.toLowerCase())
+          product?.name?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+          product?.description?.toLowerCase().includes(debouncedSearch.toLowerCase())
       )
     : []
 

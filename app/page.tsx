@@ -13,7 +13,6 @@ import { useCart } from "@/components/cart-context"
 import { useToast } from "@/components/ui/use-toast"
 import { HeroSection } from "@/components/hero-section"
 import { Footer } from "@/components/footer"
-import { Navbar } from "@/components/navbar"
 import { useRouter } from "next/navigation"
 
 interface Product {
@@ -206,8 +205,7 @@ export default function LandingPage() {
       id: product._id,
       name: product.name,
       price: displayPrice,
-      image: product.images[0]?.url || "/placeholder.jpg",
-      quantity: 1
+      image: product.images[0]?.url || "/placeholder.jpg"
     })
     
     toast({
@@ -273,17 +271,13 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation Bar */}
-      <Navbar />
-
       {/* Hero Section */}
       <HeroSection />
-
 
       <div className="container mx-auto px-4 py-8">
         <div className="flex gap-8">
           {/* Left Sidebar - Filters */}
-          <aside className="w-72 bg-gray-50 rounded-xl p-6 h-fit sticky top-24 shadow-sm">
+          <aside className="w-72 bg-gray-50 rounded-xl p-6 h-fit sticky top-24 shadow-sm hidden lg:block">
             <div className="flex items-center space-x-2 mb-6">
               <Filter className="h-5 w-5 text-brana-green" />
               <h3 className="font-bold text-xl text-gray-800">Filters</h3>
@@ -348,7 +342,7 @@ export default function LandingPage() {
             </div>
 
             {/* Products Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-4">
               {currentProducts.map((product) => {
                 const inCart = cartItems.some(item => item.id === product._id)
                 const isWishlisted = wishlist.includes(product._id)
@@ -457,52 +451,61 @@ export default function LandingPage() {
                           </span>
                         </div>
 
-                        {/* Price */}
-                        <div className="space-y-1 mb-2">
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold text-lg text-gray-800">
-                              KSh {displayPrice.toLocaleString()}
-                            </span>
+                        {/* Price and Stock Section */}
+                        <div className="space-y-1.5 mb-3">
+                          {/* Price Row */}
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                            <div className="min-w-0">
+                              <div className="font-bold text-lg text-gray-800 truncate">
+                                KSh {displayPrice.toLocaleString()}
+                              </div>
+                              {originalPrice && (
+                                <div className="text-sm text-red-500 line-through font-medium">
+                                  KSh {originalPrice.toLocaleString()}
+                                </div>
+                              )}
+                              {/* Stock Status - Always visible below price */}
+                              <div className="flex items-center space-x-1.5 mt-1">
+                                <div className={cn(
+                                  "w-2 h-2 rounded-full flex-shrink-0",
+                                  product.stock > 10 ? "bg-green-500" : 
+                                  product.stock > 0 ? "bg-yellow-500" : "bg-red-500"
+                                )} />
+                                <span className={cn(
+                                  "text-xs font-medium whitespace-nowrap",
+                                  product.stock > 10 ? "text-green-600" : 
+                                  product.stock > 0 ? "text-yellow-600" : "text-red-600"
+                                )}>
+                                  {product.stock > 10 ? `In Stock (${product.stock})` : 
+                                   product.stock > 0 ? `Low Stock (${product.stock} left)` : "Out of Stock"}
+                                </span>
+                              </div>
+                            </div>
+                            
                             <Button
                               size="sm"
-                              className="bg-orange-500 hover:bg-orange-600 text-white text-xs px-3 py-1 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
+                              className="bg-orange-500 hover:bg-orange-600 text-white text-[10px] sm:text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105 whitespace-nowrap flex-shrink-0"
                               disabled={product.stock === 0}
                               onClick={(e) => {
                                 e.stopPropagation()
-                                // Handle buy now action
+                                addToCart({
+                                  id: product._id,
+                                  name: product.name,
+                                  price: product.dealPrice || product.price,
+                                  image: product.images?.[0]?.url || '',
+                                })
+                                router.push('/checkout')
                               }}
                             >
                               Buy Now
                             </Button>
                           </div>
-                          {originalPrice && (
-                            <span className="text-sm text-red-500 line-through font-medium">
-                              KSh {originalPrice.toLocaleString()}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Stock Status */}
-                        <div className="flex items-center space-x-1 mb-2">
-                          <div className={cn(
-                            "w-2 h-2 rounded-full",
-                            product.stock > 10 ? "bg-green-500" : 
-                            product.stock > 0 ? "bg-yellow-500" : "bg-red-500"
-                          )} />
-                          <span className="text-xs text-gray-500 font-medium">
-                            {product.stock > 10 ? "In Stock" : 
-                             product.stock > 0 ? "Low Stock" : "Out of Stock"}
-                          </span>
                         </div>
                       </CardContent>
 
-                      <CardFooter className="p-4 pt-0 mt-auto">
-                        <div className="w-full text-center">
-                          <span className="text-xs text-gray-500">
-                            {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
-                          </span>
-                        </div>
-                      </CardFooter>
+
+
+
                     </div>
                   </Card>
                 )
@@ -537,46 +540,6 @@ export default function LandingPage() {
 
       {/* Footer */}
       <Footer />
-
-      {/* Temporary Visual Indicator - Remove after testing */}
-      <div className="fixed top-4 left-4 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg">
-        <div className="text-sm font-bold">✅ Changes Applied:</div>
-        <div className="text-xs">• Product cards fixed</div>
-        <div className="text-xs">• Count badges working</div>
-        <div className="text-xs">• No opacity changes</div>
-      </div>
-
-      {/* Test Buttons - Remove after testing */}
-      <div className="fixed top-4 right-4 z-50 space-y-2">
-        <Button 
-          onClick={() => {
-            const testItem = {
-              id: 'test-cart-' + Date.now(),
-              name: 'Test Cart Item',
-              price: 1000,
-              image: '/placeholder.jpg',
-              quantity: 1
-            }
-            addToCart(testItem)
-            console.log('Added to cart:', testItem)
-          }}
-          className="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1"
-        >
-          Test Cart (+1)
-        </Button>
-        <Button 
-          onClick={() => {
-            const testId = 'test-wishlist-' + Date.now()
-            const newWishlist = [...wishlist, testId]
-            setWishlist(newWishlist)
-            localStorage.setItem('branakids-wishlist', JSON.stringify(newWishlist))
-            console.log('Added to wishlist:', testId, 'New wishlist:', newWishlist)
-          }}
-          className="bg-pink-500 hover:bg-pink-600 text-white text-xs px-3 py-1"
-        >
-          Test Wishlist (+1)
-        </Button>
-      </div>
     </div>
   )
 }
