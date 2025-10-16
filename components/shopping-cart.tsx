@@ -106,7 +106,7 @@ export function ShoppingCart() {
                 <p className="text-sm text-muted-foreground">Looks like you haven't added anything to your cart yet.</p>
               </div>
               <Button asChild onClick={() => setOpen(false)}>
-                <Link href="/products">Browse Products</Link>
+                <Link href="/">Browse Products</Link>
               </Button>
             </div>
           ) : (

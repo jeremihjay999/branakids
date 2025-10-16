@@ -41,18 +41,12 @@ function ProductsContent({ products, loading, error }: { products: Product[]; lo
   const router = useRouter()
   const pathname = usePathname()
   const [wishlist, setWishlist] = useState<string[]>([])
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>(products)
   const [isInitialLoad, setIsInitialLoad] = useState(true)
   const searchValue = searchParams.get("search") || ""
   const [debouncedSearch, setDebouncedSearch] = useState(searchValue)
 
-  // Initialize filtered products only once when products are loaded
-  useEffect(() => {
-    if (isInitialLoad && products.length > 0) {
-      setFilteredProducts(products)
-      setIsInitialLoad(false)
-    }
-  }, [products, isInitialLoad])
+
 
   // Debounce search input
   useEffect(() => {

@@ -48,8 +48,8 @@ export async function PATCH(
       );
     }
 
-    // Check if the user is an admin
-    if (decodedToken.role !== 'admin') {
+    // Check if the user is an admin or super_admin
+    if (decodedToken.role !== 'admin' && decodedToken.role !== 'super_admin') {
       return NextResponse.json(
         { error: "Admin access required" },
         { status: 403 }
@@ -62,7 +62,7 @@ export async function PATCH(
     // Validate updates (only allow status and role changes)
     const allowedUpdates = {
       status: ['active', 'pending', 'inactive'],
-      role: ['admin', 'user']
+      role: ['admin', 'user', 'super_admin']
     };
     
     const sanitizedUpdates: Record<string, any> = {};

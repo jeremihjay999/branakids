@@ -46,8 +46,8 @@ export default clientPromise
 export async function connectToDatabase() {
   try {
     const client = await clientPromise;
-    // Use the database name from environment variable or default to "tech-ecommerce"
-    const db = client.db(process.env.MONGODB_DB || "tech-ecommerce");
+    // Use the database name from environment variable or default to "branakids"
+    const db = client.db(process.env.MONGODB_DB || "branakids");
     return { client, db };
   } catch (error) {
     console.error("MongoDB connection failed:", error);

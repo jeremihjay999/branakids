@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { usePathname } from "next/navigation"
 import { useState, useEffect } from "react"
@@ -162,22 +163,16 @@ export function AdminSidebar({ showMobileMenu, setShowMobileMenu }: { showMobile
         )}
       >
         {/* Header */}
-        <div className="flex h-16 items-center border-b px-3 py-4 justify-between flex-shrink-0">
+        <div className="flex h-16 items-center border-b px-3 py-4 justify-center relative flex-shrink-0">
           <Link
             href="/admin"
             className="flex items-center gap-2 font-semibold transition-all duration-300 ease-in-out md:gap-3"
             onClick={() => setShowMobileMenu(false)}
           >
-            <div className="h-10 w-10 rounded-lg shadow-lg bg-white p-1 flex items-center justify-center">
-              <div className="flex items-center space-x-1">
-                <div className="text-lg font-bold text-brana-green">BRANA</div>
-                <div className="text-sm font-bold text-brana-pink">KIDS</div>
-              </div>
-            </div>
-            <span className="ml-2 text-xl font-bold text-primary whitespace-nowrap">Admin Panel</span>
+            <Image src="/Logo1.png" alt="Brana Kids" width={96} height={24} />
           </Link>
           {/* Show close button only on mobile */}
-          <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setShowMobileMenu(false)}>
+          <Button variant="ghost" size="icon" className="md:hidden absolute top-1/2 right-2 -translate-y-1/2" onClick={() => setShowMobileMenu(false)}>
             <span className="sr-only">Close Menu</span>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-6 w-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />

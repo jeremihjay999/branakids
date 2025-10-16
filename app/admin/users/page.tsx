@@ -14,12 +14,9 @@ type UserData = {
   _id: string;
   name: string;
   email: string;
-  role: 'super_admin' | 'admin' | 'manager' | 'user';
+  role: 'admin' | 'user' | 'super_admin';
   status: 'active' | 'pending' | 'inactive';
   createdAt: string;
-  lastLogin?: string;
-  createdBy?: string;
-  permissions?: string[];
 };
 
 export default function UsersPage() {
@@ -122,11 +119,9 @@ export default function UsersPage() {
   const getRoleBadge = (role: string) => {
     switch (role) {
       case 'super_admin':
-        return <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full flex items-center"><Shield className="h-3 w-3 mr-1" /> Super Admin</span>;
+        return <span className="px-2 py-1 bg-red-700 text-white rounded-full flex items-center"><Shield className="h-3 w-3 mr-1" /> Super Admin</span>;
       case 'admin':
         return <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full flex items-center"><Shield className="h-3 w-3 mr-1" /> Admin</span>;
-      case 'manager':
-        return <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full flex items-center"><User className="h-3 w-3 mr-1" /> Manager</span>;
       case 'user':
         return <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full flex items-center"><User className="h-3 w-3 mr-1" /> User</span>;
       default:
@@ -154,7 +149,7 @@ export default function UsersPage() {
   }
 
   // Check if current user is not an admin, show access denied
-  if (currentUser?.role !== 'admin') {
+  if (currentUser?.role !== 'admin' && currentUser?.role !== 'super_admin') {
     return (
       <div className="p-4">
         <div className="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded">
@@ -241,14 +236,23 @@ export default function UsersPage() {
                     
                     {user.status === 'active' && (
                       <div className="flex justify-end space-x-2">
-                        {user.role === 'user' ? (
+                        {currentUser?.role === 'super_admin' && user.role !== 'super_admin' && (
+                          <button
+                            onClick={() => updateUser(user._id, { role: 'super_admin' })}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            Make Super Admin
+                          </button>
+                        )}
+                        {user.role === 'user' && (
                           <button
                             onClick={() => updateUser(user._id, { role: 'admin' })}
                             className="text-purple-600 hover:text-purple-900"
                           >
                             Make Admin
                           </button>
-                        ) : (
+                        )}
+                        {user.role === 'admin' && (
                           <button
                             onClick={() => updateUser(user._id, { role: 'user' })}
                             className="text-blue-600 hover:text-blue-900"

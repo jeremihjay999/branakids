@@ -80,7 +80,7 @@ export default function CheckoutPage() {
         <div className="text-center">
           <h1 className="text-3xl font-bold mb-4">Your cart is empty</h1>
           <p className="text-muted-foreground mb-8">Add some products to your cart before checking out.</p>
-          <Button onClick={() => router.push('/products')}>Browse Products</Button>
+          <Button onClick={() => router.push('/')}>Browse Products</Button>
         </div>
       </main>
     )

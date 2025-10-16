@@ -16,7 +16,27 @@ export default function RootLayout({
         <div className="container flex h-16 items-center justify-between relative">
           <MainNav />
           <div className="absolute left-1/2 -translate-x-1/2 md:hidden">
-            <span className="font-bold text-2xl brana-text-gradient">Brana Kids</span>
+            <Link href="/" className="flex items-center space-x-2">
+              <img 
+                src="/Logo1.png" 
+                alt="Brana Kids Logo" 
+                className="h-10 w-auto object-contain"
+                width={40}
+                height={40}
+              />
+              <span className="text-2xl font-bold">
+                <span className="text-[#FF6B6B]">B</span>
+                <span className="text-[#4ECDC4]">r</span>
+                <span className="text-[#45B7D1]">a</span>
+                <span className="text-[#96CEB4]">n</span>
+                <span className="text-[#FFEEAD]">a</span>
+                <span className="text-[#FF6B6B]">K</span>
+                <span className="text-[#4ECDC4]">i</span>
+                <span className="text-[#45B7D1]">D</span>
+                <span className="text-[#96CEB4]">S</span>
+                <span className="text-[#FF6B6B]">!</span>
+              </span>
+            </Link>
           </div>
           <div className="flex items-center justify-end space-x-2 md:space-x-4">
             <ThemeToggle />

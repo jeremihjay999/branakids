@@ -17,7 +17,7 @@ const Checkbox = React.forwardRef<
       "hover:border-brana-green hover:bg-gray-50 cursor-pointer",
       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brana-green focus-visible:ring-offset-2",
       "disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-gray-300 disabled:hover:bg-transparent",
-      "data-[state=checked]:border-brana-green data-[state=checked]:bg-brana-green data-[state=checked]:text-white",
+      "data-[state=checked]:border-brana-green data-[state=checked]:bg-brana-green",
       className
     )}
     {...props}

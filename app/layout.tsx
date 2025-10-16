@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   description: "Discover the best children's products at BRANA KIDS. From toys to clothing, we bring joy and smiles to your little ones. Quality products for happy kids.",
   keywords: "children store, kids toys, baby products, children clothing, kids accessories, BRANA KIDS, children Kenya",
   generator: 'v0.dev',
-  metadataBase: new URL('https://branakids.co.ke'),
+  metadataBase: new URL('https://branakids.com'),
   alternates: {
     canonical: '/',
   },
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
-    url: 'https://branakids.co.ke/',
+    url: 'https://branakids.com/',
     title: "BRANA KIDS | Children's Store - Let Your Kid Smile",
     description: "Discover the best children's products at BRANA KIDS. From toys to clothing, we bring joy and smiles to your little ones.",
     images: [
@@ -94,7 +94,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
-      <body className={`${inter.className} bg-background`}>
+      <body className={`${inter.className} bg-background`} suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

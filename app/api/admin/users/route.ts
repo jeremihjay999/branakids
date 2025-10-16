@@ -35,8 +35,8 @@ export async function GET(request: Request) {
       );
     }
 
-    // Check if the user is an admin
-    if (decodedToken.role !== 'admin') {
+    // Check if the user is an admin or super_admin
+    if (decodedToken.role !== 'admin' && decodedToken.role !== 'super_admin') {
       return NextResponse.json(
         { error: "Admin access required" },
         { status: 403 }

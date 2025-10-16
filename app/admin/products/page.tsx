@@ -73,12 +73,8 @@ export default function ProductsPage() {
       const response = await fetch(url)
       if (!response.ok) throw new Error("Failed to fetch products")
       const data = await response.json()
-      
-      // Handle both array and object responses
-      const productsArray = Array.isArray(data) ? data : (data.products || [])
-      
       // Sort products by date in descending order (newest first)
-      const sortedProducts = productsArray.sort((a: any, b: any) => 
+      const sortedProducts = data.sort((a: any, b: any) => 
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       )
       setProducts(sortedProducts)

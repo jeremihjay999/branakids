@@ -60,49 +60,53 @@ export function MobileNav({ onSearch, searchValue, searchResults, onResultClick,
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="flex flex-col max-w-[85vw] w-80 p-0">
-        <div className="flex items-center justify-between w-full p-2 md:hidden bg-white border-b sticky top-0 z-40">
-          <div className="flex items-center">
-            <div className="text-2xl font-bold text-brana-green">BRANA</div>
-            <div className="text-xl font-bold text-brana-pink">KIDS</div>
-          </div>
-          <div className="absolute -top-1 -right-1 text-brana-yellow text-sm">⭐</div>
-        </div>
         <div className="flex-1 overflow-auto">
-          <div className="flex items-center justify-center py-6 px-4">
-          <Link href="/" className="block h-12 w-full max-w-[180px]">
-            <img 
-              src="/Logo1.png" 
-              alt="Brana Kids" 
-              className="h-full w-full object-contain"
-              width={180}
-              height={48}
-            />
-          </Link>
-        </div>
-          <div className="bg-primary/10 dark:bg-primary/5 p-6 border-b">
-            {onSearch && (
-              <form onSubmit={handleSearch} className="relative mt-5">
-                <Input
-                  type="text"
-                  value={localSearchValue}
-                  onChange={(e) => setLocalSearchValue(e.target.value)}
-                  placeholder="Search kids products..."
-                  className="pl-10 pr-4 py-2 rounded-lg bg-background/90 border-primary/20 focus-visible:ring-primary/30"
-                />
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <Button 
-                  type="submit" 
-                  size="sm" 
-                  className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0 rounded-full"
-                  onClick={() => {
-                    if (onSearch) onSearch(localSearchValue);
-                  }}
-                >
-                  <Search className="h-3.5 w-3.5" />
-                  <span className="sr-only">Search</span>
-                </Button>
-              </form>
-            )}
+          <div className="flex flex-col items-center py-4 px-4 bg-white border-b sticky top-0 z-40">
+            <Link href="/" className="block h-12 w-full max-w-[180px] mb-2">
+              <img 
+                src="/Logo1.png" 
+                alt="Brana Kids" 
+                className="h-full w-full object-contain"
+                width={180}
+                height={48}
+              />
+            </Link>
+            <div className="text-2xl font-bold">
+              <span className="text-[#FF6B6B]">B</span>
+              <span className="text-[#4ECDC4]">r</span>
+              <span className="text-[#45B7D1]">a</span>
+              <span className="text-[#96CEB4]">n</span>
+              <span className="text-[#FFEEAD]">a</span>
+              <span className="text-[#FF6B6B]">K</span>
+              <span className="text-[#4ECDC4]">i</span>
+              <span className="text-[#45B7D1]">D</span>
+              <span className="text-[#96CEB4]">S</span>
+              <span className="text-[#FF6B6B]!">!</span>
+            </div>
+          </div>
+          <div className="p-4">
+            <div className="bg-primary/10 dark:bg-primary/5 p-6 border-b">
+              {onSearch && (
+                <form onSubmit={handleSearch} className="relative">
+                  <Input
+                    type="text"
+                    value={localSearchValue}
+                    onChange={(e) => setLocalSearchValue(e.target.value)}
+                    placeholder="Search kids products..."
+                    className="pl-10 pr-4 py-2 rounded-lg bg-background/90 border-primary/20 focus-visible:ring-primary/30"
+                  />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                  <Button 
+                    type="submit"
+                    size="sm"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0 rounded-full"
+                  >
+                    <Search className="h-3.5 w-3.5" />
+                    <span className="sr-only">Search</span>
+                  </Button>
+                </form>
+              )}
+            </div>
           </div>
 
           <nav className="p-4">

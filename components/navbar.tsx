@@ -69,9 +69,9 @@ export function Navbar() {
               <span>+254 758 212 888</span>
             </a>
             <span className="hidden md:inline-block text-gray-300">|</span>
-            <a href="mailto:info@branakids.co.ke" className="flex items-center hover:text-pink-500 transition-colors">
+            <a href="mailto:info@branakids.com" className="flex items-center hover:text-pink-500 transition-colors">
               <Mail className="h-3.5 w-3.5 mr-1.5" />
-              <span>info@branakids.co.ke</span>
+              <span>info@branakids.com</span>
             </a>
           </div>
           <div className="text-xs">

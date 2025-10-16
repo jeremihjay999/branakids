@@ -9,8 +9,8 @@ import { motion } from "framer-motion";
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [email, setEmail] = useState("superadmin@gmail.com");
-  const [password, setPassword] = useState("superadmin123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -22,13 +22,6 @@ function LoginContent() {
       setError('Access denied. You need administrator privileges to access this area.');
     }
   }, [searchParams]);
-
-  // Clear error when user starts typing
-  const clearError = () => {
-    if (error) {
-      setError("");
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,10 +134,7 @@ function LoginContent() {
               type="email"
               placeholder="Email Address"
               value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                clearError();
-              }}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full py-2 pl-8 pr-3 bg-transparent text-white border-b border-gray-500 focus:border-blue-400 outline-none transition-colors duration-300 placeholder-gray-400"
               required
             />
@@ -156,10 +146,7 @@ function LoginContent() {
               type={showPassword ? "text" : "password"}
               placeholder="Password"
               value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                clearError();
-              }}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full py-2 pl-8 pr-10 bg-transparent text-white border-b border-gray-500 focus:border-blue-400 outline-none transition-colors duration-300 placeholder-gray-400"
               required
             />

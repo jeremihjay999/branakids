@@ -74,30 +74,7 @@ export function SimpleProductFilters({ products, onFiltersChange, className }: S
     [products]
   );
 
-  // Apply filters and notify parent when they change
-  React.useEffect(() => {
-    // Skip the initial render to prevent double-calling with initial state
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
 
-    let result = [...products];
-
-    // Category filter
-    if (filters.categories.length > 0) {
-      result = result.filter(product => 
-        filters.categories.includes(product.category)
-      );
-    }
-
-    // On sale filter
-    if (filters.onSale) {
-      result = result.filter(product => product.isDeal);
-    }
-
-    onFiltersChange(result);
-  }, [filters, products, onFiltersChange]);
 
   const toggleCategory = React.useCallback((category: string) => {
     setFilters(prev => {

@@ -1,13 +1,15 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import React, { useEffect, useState, useCallback, useMemo } from "react"
 import Image from "next/image"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Slider } from "@/components/ui/slider"
-import { Heart, Search, Star, ShoppingCart, Filter, AlertCircle, RefreshCw } from "lucide-react"
+import { Heart, Search, Star, ShoppingCart, Filter, AlertCircle, RefreshCw, X, ChevronDown, ChevronUp } from "lucide-react"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { useDebounce } from "@/hooks/useDebounce"
 import { cn, formatCurrency } from "@/lib/utils"
 import { useCart } from "@/components/cart-context"
 import { useToast } from "@/components/ui/use-toast"
@@ -52,7 +54,7 @@ interface ProductGridProps {
 }
 
 export function ProductGrid({ products, categories }: ProductGridProps) {
-  const { addToCart, items: cartItems } = useCart()
+  const { addToCart, cartItems = [] } = useCart()
   const { toast } = useToast()
   const router = useRouter()
   
@@ -61,6 +63,14 @@ export function ProductGrid({ products, categories }: ProductGridProps) {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [priceRange, setPriceRange] = useState([0, 10000])
   const [wishlist, setWishlist] = useState<string[]>([])
+  const [isSearching, setIsSearching] = useState(false)
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false)
+  const debouncedSearch = useDebounce(search, 300)
+
+  // Toggle mobile filters
+  const toggleMobileFilters = () => {
+    setIsMobileFiltersOpen(!isMobileFiltersOpen)
+  }
 
   // Load wishlist from localStorage on mount
   useEffect(() => {
@@ -74,24 +84,127 @@ export function ProductGrid({ products, categories }: ProductGridProps) {
     }
   }, [])
 
-  // Filter products with memoization
-  const filteredProducts = useCallback(() => {
-    return products.filter(product => {
-      const matchesSearch = !search || 
-        product.name.toLowerCase().includes(search.toLowerCase()) ||
-        product.description.toLowerCase().includes(search.toLowerCase()) ||
-        (product.tags && product.tags.some(tag => 
-          tag.toLowerCase().includes(search.toLowerCase())
-        ))
-      
-      const matchesCategory = selectedCategories.length === 0 || 
+  // Search function with debouncing
+  const searchProducts = useCallback((searchTerm: string, products: Product[]) => {
+    if (!searchTerm.trim()) return products
+    
+    const term = searchTerm.toLowerCase()
+    return products.filter(product => 
+      product.name?.toLowerCase().includes(term) ||
+      (product.description?.toLowerCase().includes(term)) ||
+      (product.tags?.some(tag => tag?.toLowerCase().includes(term)))
+    )
+  }, [])
+
+  // Filter products based on all criteria
+  const filteredProducts = useMemo(() => {
+    let result = [...products]
+    
+    // Apply search filter
+    if (debouncedSearch) {
+      result = searchProducts(debouncedSearch, result)
+    }
+    
+    // Apply category filter
+    if (selectedCategories.length > 0) {
+      result = result.filter(product => 
         selectedCategories.includes(product.category)
-      
-      const matchesPrice = product.price >= priceRange[0] && product.price <= priceRange[1]
-      
-      return matchesSearch && matchesCategory && matchesPrice
+      )
+    }
+    
+    // Apply price range filter
+    result = result.filter(
+      product => product.price >= priceRange[0] && product.price <= priceRange[1]
+    )
+    
+    return result
+  }, [products, debouncedSearch, selectedCategories, priceRange, searchProducts])
+  
+  // Handle search input change with loading state
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value)
+    setIsSearching(!!e.target.value.trim())
+  }
+
+  // Clear search
+  const clearSearch = () => {
+    setSearch('')
+    setIsSearching(false)
+  }
+
+  // Clear all filters
+  const clearAllFilters = () => {
+    setSelectedCategories([])
+    setPriceRange([0, 10000])
+    toast({
+      title: "Filters cleared",
+      description: "All filters have been reset",
     })
-  }, [products, search, selectedCategories, priceRange])
+  }
+
+  const currentProducts = filteredProducts
+  const hasActiveFilters = selectedCategories.length > 0 || priceRange[0] > 0 || priceRange[1] < 10000
+
+  // Render filters function
+  const renderFilters = () => (
+    <>
+      <div className="mb-8">
+        <h4 className="font-semibold text-lg mb-4 text-gray-700">Category</h4>
+        <div className="space-y-3 max-h-64 overflow-y-auto">
+          {categories.slice(0, 8).map((category) => (
+            <div key={category._id} className="flex items-center space-x-3">
+              <Checkbox
+                id={category.name}
+                checked={selectedCategories.includes(category.name)}
+                onCheckedChange={(checked) => 
+                  handleCategoryChange(category.name, checked as boolean)
+                }
+                className="border-2 border-gray-300 data-[state=checked]:bg-brana-green data-[state=checked]:border-brana-green"
+              />
+              <label 
+                htmlFor={category.name}
+                className="text-sm font-medium text-gray-700 cursor-pointer hover:text-brana-green transition-colors"
+              >
+                {category.name}
+              </label>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <h4 className="font-semibold text-lg mb-4 text-gray-700">Price Range (KSh)</h4>
+        <div className="space-y-4">
+          <Slider
+            value={priceRange}
+            onValueChange={setPriceRange}
+            max={10000}
+            min={0}
+            step={100}
+            className="w-full"
+          />
+          <div className="flex justify-between text-sm text-gray-600 font-medium">
+            <span>KSh {priceRange[0].toLocaleString()}</span>
+            <span>KSh {priceRange[1].toLocaleString()}</span>
+          </div>
+        </div>
+      </div>
+      
+      {hasActiveFilters && (
+        <div className="mt-8 pt-6 border-t border-gray-200">
+          <button
+            onClick={clearAllFilters}
+            className="w-full py-2.5 px-4 rounded-lg border-2 border-gray-200 text-gray-600 font-medium 
+                     hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 flex items-center 
+                     justify-center space-x-2"
+          >
+            <X className="h-4 w-4" />
+            <span>Clear all filters</span>
+          </button>
+        </div>
+      )}
+    </>
+  )
 
   // Event handlers
   const toggleWishlist = useCallback((id: string) => {
@@ -144,58 +257,114 @@ export function ProductGrid({ products, categories }: ProductGridProps) {
     router.push(`/product/${productId}`)
   }, [router])
 
-  const currentProducts = filteredProducts()
-
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex gap-8">
-        {/* Left Sidebar - Filters */}
-        <aside className="w-72 bg-gray-50 rounded-xl p-6 h-fit sticky top-24 shadow-sm hidden lg:block">
-          <div className="flex items-center space-x-2 mb-6">
-            <Filter className="h-5 w-5 text-brana-green" />
-            <h3 className="font-bold text-xl text-gray-800">Filters</h3>
-          </div>
-          
-          <div className="mb-8">
-            <h4 className="font-semibold text-lg mb-4 text-gray-700">Category</h4>
-            <div className="space-y-3 max-h-64 overflow-y-auto">
-              {categories.slice(0, 8).map((category) => (
-                <div key={category._id} className="flex items-center space-x-3">
-                  <Checkbox
-                    id={category.name}
-                    checked={selectedCategories.includes(category.name)}
-                    onCheckedChange={(checked) => 
-                      handleCategoryChange(category.name, checked as boolean)
-                    }
-                    className="border-2 border-gray-300 data-[state=checked]:bg-brana-green data-[state=checked]:border-brana-green"
-                  />
-                  <label 
-                    htmlFor={category.name}
-                    className="text-sm font-medium text-gray-700 cursor-pointer hover:text-brana-green transition-colors"
-                  >
-                    {category.name}
-                  </label>
+      {/* Search Bar */}
+      <div className="mb-8">
+        <div className="relative max-w-2xl mx-auto">
+              <div className="relative">
+                <Input
+                  type="search"
+                  name="search"
+                  placeholder="Search for products..."
+                  className="w-full rounded-full px-6 py-3 text-lg pr-12"
+                  value={search}
+                  onChange={handleSearchChange}
+                  autoComplete="off"
+                />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  {isSearching ? (
+                    <RefreshCw className="h-5 w-5 text-brana-green animate-spin" />
+                  ) : (
+                    <Search className="h-5 w-5 text-gray-400" />
+                  )}
                 </div>
-              ))}
-            </div>
+              </div>
+          {isSearching && (
+            <p className="mt-2 text-sm text-gray-500 text-center">
+              Found {currentProducts.length} {currentProducts.length === 1 ? 'product' : 'products'}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-8">
+        {/* Left Sidebar - Filters */}
+        <aside className="w-full lg:w-72 lg:sticky lg:top-24 h-fit">
+          {/* Mobile Filter Button */}
+          <div className="lg:hidden mb-4">
+            <Button variant="outline" className="w-full" onClick={toggleMobileFilters}>
+              <Filter className="h-4 w-4 mr-2" />
+              {isMobileFiltersOpen ? 'Hide Filters' : 'Show Filters'}
+            </Button>
           </div>
 
-          <div>
-            <h4 className="font-semibold text-lg mb-4 text-gray-700">Price Range (KSh)</h4>
-            <div className="space-y-4">
-              <Slider
-                value={priceRange}
-                onValueChange={setPriceRange}
-                max={10000}
-                min={0}
-                step={100}
-                className="w-full"
-              />
-              <div className="flex justify-between text-sm text-gray-600 font-medium">
-                <span>KSh {priceRange[0].toLocaleString()}</span>
-                <span>KSh {priceRange[1].toLocaleString()}</span>
+          {/* Filter Content */}
+          <div className={cn('bg-gray-50 rounded-xl p-6 shadow-sm', {
+            'hidden lg:block': !isMobileFiltersOpen,
+            'block': isMobileFiltersOpen
+          })}>
+            <div className="flex items-center space-x-2 mb-6">
+              <Filter className="h-5 w-5 text-brana-green" />
+              <h3 className="font-bold text-xl text-gray-800">Filters</h3>
+            </div>
+            
+            <div className="mb-8">
+              <h4 className="font-semibold text-lg mb-4 text-gray-700">Category</h4>
+              <div className="space-y-3 max-h-64 overflow-y-auto">
+                {categories.slice(0, 8).map((category) => (
+                  <div key={category._id} className="flex items-center space-x-3">
+                    <Checkbox
+                      id={category.name}
+                      checked={selectedCategories.includes(category.name)}
+                      onCheckedChange={(checked) => 
+                        handleCategoryChange(category.name, checked as boolean)
+                      }
+                      className="border-2 border-gray-300 data-[state=checked]:bg-brana-green data-[state=checked]:border-brana-green"
+                    />
+                    <label 
+                      htmlFor={category.name}
+                      className="text-sm font-medium text-gray-700 cursor-pointer hover:text-brana-green transition-colors"
+                    >
+                      {category.name}
+                    </label>
+                  </div>
+                ))}
               </div>
             </div>
+
+            <div>
+              <h4 className="font-semibold text-lg mb-4 text-gray-700">Price Range (KSh)</h4>
+              <div className="space-y-4">
+                <Slider
+                  value={priceRange}
+                  onValueChange={setPriceRange}
+                  max={10000}
+                  min={0}
+                  step={100}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-sm text-gray-600 font-medium">
+                  <span>KSh {priceRange[0].toLocaleString()}</span>
+                  <span>KSh {priceRange[1].toLocaleString()}</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Clear Filters Button */}
+            {hasActiveFilters && (
+              <div className="mt-8 pt-6 border-t border-gray-200">
+                <button
+                  onClick={clearAllFilters}
+                  className="w-full py-2.5 px-4 rounded-lg border-2 border-gray-200 text-gray-600 font-medium 
+                           hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 flex items-center 
+                           justify-center space-x-2"
+                >
+                  <X className="h-4 w-4" />
+                  <span>Clear all filters</span>
+                </button>
+              </div>
+            )}
           </div>
         </aside>
 
@@ -211,7 +380,7 @@ export function ProductGrid({ products, categories }: ProductGridProps) {
           {/* Products Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 gap-2">
             {currentProducts.map((product) => {
-              const inCart = cartItems.some(item => item.id === product._id)
+              const inCart = cartItems.some((item: { id: string }) => item.id === product._id)
               const isWishlisted = wishlist.includes(product._id)
               const displayPrice = product.isDeal && product.dealPrice ? product.dealPrice : product.price
               const originalPrice = product.isDeal && product.previousPrice ? product.previousPrice : null
@@ -402,3 +571,4 @@ export function ProductGrid({ products, categories }: ProductGridProps) {
     </div>
   )
 }
+

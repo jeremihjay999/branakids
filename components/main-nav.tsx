@@ -40,15 +40,27 @@ export function MainNav({ onSearch, searchValue, searchResults = [], onResultCli
   return (
     <div className="hidden md:flex items-center">
       {/* Logo */}
-      <div className="mr-4">
-        <Link href="/" className="block h-10 w-auto">
+      <div className="flex items-center space-x-2 mr-6">
+        <Link href="/" className="flex items-center space-x-2">
           <img 
             src="/Logo1.png" 
             alt="Brana Kids Logo" 
-            className="h-full w-auto object-contain"
-            width={120}
+            className="h-10 w-auto object-contain"
+            width={40}
             height={40}
           />
+          <span className="text-2xl font-bold">
+            <span className="text-[#FF6B6B]">B</span>
+            <span className="text-[#4ECDC4]">r</span>
+            <span className="text-[#45B7D1]">a</span>
+            <span className="text-[#96CEB4]">n</span>
+            <span className="text-[#FFEEAD]">a</span>
+            <span className="text-[#FF6B6B]">K</span>
+            <span className="text-[#4ECDC4]">i</span>
+            <span className="text-[#45B7D1]">D</span>
+            <span className="text-[#96CEB4]">S</span>
+            <span className="text-[#FF6B6B]">!</span>
+          </span>
         </Link>
       </div>
       
