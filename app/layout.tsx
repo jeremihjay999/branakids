@@ -10,6 +10,7 @@ import { MobileNav } from "@/components/mobile-nav"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { ShoppingCart } from "@/components/shopping-cart"
 import { MobileBottomNav } from "@/components/mobile-bottom-nav"
+import { Footer } from "@/components/footer"
 import Link from "next/link"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -136,6 +137,9 @@ export default function RootLayout({
 
               {/* Mobile Bottom Navigation */}
               <MobileBottomNav />
+              
+              {/* Footer */}
+              <Footer />
               
               <Toaster />
             </div>
